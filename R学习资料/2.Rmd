@@ -1,0 +1,271 @@
+---
+title: "title"
+output: html_document
+date: "2023-03-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+#2、1
+library(ISLR2)
+#dat=Weekly
+logit1=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,data = Weekly,family=binomial)
+summary(logit1)
+#2、2
+Weekly$predict1=logit1$fitted.values>0.5
+print(table(Weekly$predict1,Weekly$Direction))
+
+```
+
+
+```{r cars}
+#2、3
+library(ISLR2)
+library(dplyr)
+dat=filter(Weekly,Year>=1990,Year<=2008)
+test_dat=filter(Weekly,Year>=2009,Year<=2010)
+logit2=glm(Direction~Lag2+Volume,data = dat,family = binomial)
+#summary(logit2)
+dat$predict_res=logit2$fitted.values>0.5
+
+#table(test_dat$Direction,test_dat$res)
+```
+
+
+
+
+```{r cars}
+#2、4
+library(ISLR2)
+library(dplyr)
+library(MASS)
+dat=filter(Weekly,Year>=1990,Year<=2008)
+test_dat=filter(Weekly,Year>=2009,Year<=2010)
+lda0=lda(Direction~Lag2+Volume,data=dat)
+
+test_dat$prect_lda=predict(lda0,newdata=test_dat)$class
+
+table(test_dat$Direction,prect_lda)
+```
+
+
+
+```{r cars}
+#2、5
+library(ISLR2)
+library(dplyr)
+library(class)
+train_dat=filter(Weekly,Year>=1990,Year<=2008)
+test_dat=filter(Weekly,Year>=2009,Year<=2010)
+train=train_dat[,c("Lag2","Volume")]
+test=test_dat[,c("Lag2","Volume")]
+cl=train_dat[,c("Direction")]
+knn1=knn(train,test,cl,k=1,prob=TRUE)
+table(knn1)
+table(test_dat$Direction,knn1)
+```
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+#2、6
+library(ISLR2)
+library(dplyr)
+library(e1071)
+dat=filter(Weekly,Year>=1990,Year<=2008)
+test_dat=filter(Weekly,Year>=2009,Year<=2010)
+nb1=naiveBayes(Direction~Lag2+Volume,data=dat)
+test_dat$prectit_nb=predict(nb1,newdata=test_dat,type="class")
+
+table(test_dat$prectit_nb)
+```
+
+```{r pressure, echo=FALSE}
+#3、1
+library(ISLR2)
+#summary(Boston$crim)
+m=median(Boston$crim)
+Boston$crim1=ifelse(Boston$crim>m,1,0)
+for(i in 1:ncol(Boston)){
+  boxplot(crim1~Boston[,i],data = Boston)
+}
+
+
+```
+
+
+```{r pressure, echo=FALSE}
+#3、2
+library(ISLR2)
+train=Boston[1:400,]
+test=Boston[401:nrow(Boston),]
+logit3=glm(crim1~crim+nox+age+rad+medv,data = train,family = binomial)
+#summary(logit3)
+predict_lot=predict(logit3,newdata = test,type="response")>0.5
+table(predict_lot,test$crim1)
+```
+```{r pressure, echo=FALSE}
+#3、3
+library(ISLR2)
+library(MASS)
+train=Boston[1:400,]
+test=Boston[401:nrow(Boston),]
+lda2=lda(crim1~.-crim1,data = train)
+test_dat=predict(lda2,newdata = test)$class
+table(test_dat)
+```
+
+```{r pressure, echo=FALSE}
+#3、4
+library(ISLR2)
+library(e1071)
+train=Boston[1:400,]
+test=Boston[401:nrow(Boston),]
+nb2=naiveBayes(crim1~crim+nox+age+rad+medv,data=train)
+test_dat=predict(nb2,newdata=test)
+table(test$crim1,test_dat)
+```
+
+
+```{r pressure, echo=FALSE}
+#3、5
+library(ISLR2)
+library(class)
+train=Boston[1:400,]
+test=Boston[401:nrow(Boston),]
+
+train_dat=train[,c("crim","age","medv")]
+test_dat=test[,c("crim","age","medv")]
+cl=train[,c("crim1")]
+for(i in 1:7){
+knn1=knn(train_dat,test_dat,cl,k=i,prob=TRUE)
+print("k取为")
+print(i)
+print(table(test$crim1,knn1))
+}
+ 
+
+
+```
+
+```{r pressure, echo=FALSE}
+#4、1
+philly=read.csv("Philly.csv")
+philly$casualty=philly$Death+philly$Injury
+a=ifelse(philly$Collision=="Angle",ifelse(philly$casualty!=0,1,0),0)
+b=ifelse(philly$Collision=="Hit_fixed_object",ifelse(philly$casualty!=0,1,0),0)
+c=ifelse(philly$Collision=="Hit_pedestrian",ifelse(philly$casualty!=0,1,0),0)
+d=ifelse(philly$Collision=="Rear_end",ifelse(philly$casualty!=0,1,0),0)
+par(mfrow=c(2,2))
+hist(a,labels = TRUE,ylim=range(0,90000),main = "Angle",breaks = 2,xaxt="n")
+hist(b,labels = TRUE,ylim=range(0,90000),main = "Hit_fixed_object",breaks = 2,xaxt="n")
+hist(c,labels = TRUE,ylim=range(0,90000),main = "Hit_pedestrian",breaks = 2,xaxt="n")
+hist(d,labels = TRUE,ylim=range(0,90000),main = "Rear_end",breaks = 2,xaxt="n")
+axis(1,1)
+print(prop.table(table(philly$Collision)))
+
+```
+
+```{r }
+library(ISLR2)
+library(e1071)
+library(datasets)
+library(ROCR)
+set.seed(1)
+x=matrix(rnorm(200*2),ncol=2)
+x[1:100,]=x[1:100,]+2
+x[101:150,]=x[101:150,]-2
+y=c(rep(1,150),rep(2,50))
+dat=data.frame(x=x,y=as.factor(y))
+recplot=function(red,truth,...){
+  predob=prediction(pred,truth)
+  perf=performance(predob,"tpr","fpr")
+  plot(perf,...)
+}
+
+svmfit.opt=svm(y~.,data=dat[train,],kernel="radial",gamma=2,cost=2,decision.value=T)
+fitted=attributes(predict(svmfit.opt,dat[train,],decision.values=TRUE)$decision.valuesrocplot(-fitted,dat[train,"y"],main="training data"))
+
+roc1=data.frame(attributes(predict(svmfit.opt,dat[train,],decision.values=TRUE)))
+roc1$truth=dat[train,"y"]
+roc1=roc1[order(roc1$x1.2),]
+roc1$T1=0
+roc1$T2=0
+for(i in 1:nrow(roc1)){
+  roc1[i,"T1"]=sum(roc1[1:i,"truth"]=="1")
+  roc1[i,"T2"]=sum(roc1[1:i,"truth"]=="2")
+}
+roc1$TPR=roc1$T1/sum(roc1[,"truth"]=="1")
+roc1$FPR=roc1$T2/sum(roc1[,"truth"]=="2")
+lines(roc1$TPR,roc1$FPR,col="blue")
+
+
+# svm用于回归
+data(mtcars)
+svm_mtcars=svm(mpg~wt+hp,data=mtcars,kernel="radial")
+newdat=data.frame(wt=3.6,hp=170)
+pre2=predict(svm_model,newdata = newdat)
+
+class(pre2)
+
+# svm用于分类
+svm_iris=svm(Species~.,data=iris,kernel="linear",cost=10)
+summary(svm_iris)
+plot(svm_iris,iris,Petal.Width~Petal.Length,slice=list(Sepal.Width=3,Sepal.Length=4))
+# data("iris")
+# x=iris[,3:4]
+# y=ifelse(iris$Petal.Width>=1.5,1,0)
+
+# 训练svm模型
+
+# svm_model=svm(x=x,y=y,kernel="linear")
+# newdat=data.frame(petal.length=6,petal.width=2)
+# pre=predict(svm_model,newdat)
+# print(pre)
+
+set.seed(2)
+Carseats$High=ifelse(Carseats$Sales<=8,"Yes","No")
+Carseats$High=factor(Carseats$High)
+train=sample(1:nrow(Carseats),nrow(Carseats)/2)
+train_Carseats=Carseats[train,]
+test_Carseats=Carseats[-train,]
+
+svm_Carseats=svm(High~.-Sales,data=train_Carseats,kernel="radial",gamma=0.001,cost=1)
+summary(svm_Carseats)
+
+tune.out=tune(svm,High~.-Sales,data=train_Carseats,kernel="radial",ranges = list(cost=c(0.1,1,10,100),gamma=c(0.001,0.001,0.01,0.1,1)))
+summary(tune.out)
+
+
+```
+
+```{r pressure, echo=FALSE}
+#4、2\3
+philly=read.csv("Philly.csv")
+philly$casualty=philly$Death+philly$Injury
+g1=glm(casualty~Daytime+Weather+Collision,data =philly,family=poisson(link="log"))
+#summary(g1)
+
+l1=lm(casualty~Daytime+Weather+Collision,data =philly)
+#summary(l1)
+pre1=predict(l1,newdata=philly)
+a=sum((pre1-philly$casualty)^2)
+r_l=sqrt(a/nrow(philly))
+
+pre2=predict(g1,newdata = philly)
+b=sum((pre2-philly$casualty)^2)
+r_g=sqrt(b/nrow(philly))
+print(r_l)
+print(r_g)
+```
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
